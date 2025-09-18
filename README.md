@@ -24,4 +24,4 @@
 
 ### Схема архитектуры VK Data Lakehouse
 
-<img src="/img/architecture_lakehouse.jpeg" alt="Схема архитектуры VK Data Lakehouse" width="500" height="300">
+<img src="/img/architecture_lakehouse.jpeg" alt="Схема архитектуры VK Data Lakehouse" width="800" height="800">
