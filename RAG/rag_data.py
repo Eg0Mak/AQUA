@@ -67,9 +67,14 @@ chunked_docs = splitter.split_documents(all_docs)
 
 
 # Model Loading
-model_id = "onnx-community/embeddinggemma-300m-ONNX"
-model_path = hf_hub_download(model_id, subfolder="onnx", filename="model.onnx")
-hf_hub_download(model_id, subfolder="onnx", filename="model.onnx_data")
+# model_id = "onnx-community/embeddinggemma-300m-ONNX"
+# model_path = hf_hub_download(model_id, subfolder="onnx", filename="model.onnx")
+# hf_hub_download(model_id, subfolder="onnx", filename="model.onnx_data")
+# session = ort.InferenceSession(model_path)
+# tokenizer = AutoTokenizer.from_pretrained(model_id)
+
+model_id = "sentence-transformers/all-MiniLM-L6-v2-onnx"
+model_path = hf_hub_download(model_id, filename="model.onnx")
 session = ort.InferenceSession(model_path)
 tokenizer = AutoTokenizer.from_pretrained(model_id)
 
