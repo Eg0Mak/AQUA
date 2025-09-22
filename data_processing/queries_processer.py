@@ -271,7 +271,7 @@ def read_json_file(filepath):
         return None
 
 # Пример использования:
-filepath = 'flights.json'
+filepath = 'data/flights.json'
 data = read_json_file(filepath)
 
 # --- Пример использования ---
@@ -298,4 +298,5 @@ marked_up_data = analyze_and_markup_sql(data_from_snippet)
 marked_up_data = analyze_and_markup_sql([data['queries'][0]])
 
 # Выводим результат в красивом формате JSON
+
 print(json.dumps(marked_up_data, indent=2, ensure_ascii=False))
