@@ -1,0 +1,12 @@
+# Виртуальные окружения Python
+.venv/
+venv/
+env/
+ENV/
+
+# Кэш Python
+__pycache__/
+*.py[cod]
+
+# Метаданные папок на MacOS
+**/.DS_Store
