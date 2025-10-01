@@ -270,33 +270,49 @@ def read_json_file(filepath):
         print(f"Произошла ошибка при чтении файла: {e}")
         return None
 
-# Пример использования:
-filepath = 'data/flights.json'
-data = read_json_file(filepath)
+if __name__ == "__main__":
+    # Пример использования:
+    filepath = 'data/queries_marked_602_915_utf8_prep.jsonl'
 
-# --- Пример использования ---
+    with open(filepath, "r", encoding="utf-8") as f:
+        for line in f:
+            obj = json.loads(line)
+            single_query_res = markup_single_query(obj['output'])
+            print(single_query_res['security_score'], end=' ')
+            print(single_query_res['optimization_score'], end=' ')
+            print(single_query_res['performance_score'], end=' ')
+            print(single_query_res['correctness_score'])
+    '''
+    # --- Пример использования ---
 
-# Представим, что вы считали ваш JSON-файл в эту переменную `data_from_snippet`
-data_from_snippet = [
-    {
-      "queryid": "10ba3c04-0f91-4ef3-a717-c1e0d33b31bc",
-      "query": "WITH MonthlyFlightCounts AS ( SELECT Origin, month(FlightDate) AS Month, COUNT(*) AS TotalFlights FROM flights.public.flights GROUP BY Origin, month(FlightDate) ORDER BY Month DESC, TotalFlights DESC ), TopAirportsByMonth AS ( SELECT Month, Origin, TotalFlights, RANK() OVER (PARTITION BY Month ORDER BY TotalFlights DESC) AS AirportRank FROM MonthlyFlightCounts ), FilteredFlights AS ( SELECT f.*, CASE WHEN f.DepTimeBlk IN ('0600-0659', '0700-0759', '0800-0859', '1600-1659', '1700-1759', '1800-1859') THEN 'Peak' ELSE 'Off-Peak' END AS TimeOfDay FROM flights.public.flights f JOIN TopAirportsByMonth t ON f.Origin = t.Origin AND month(f.FlightDate) = t.Month WHERE f.Cancelled = false AND f.Diverted = false AND t.AirportRank <= 10 ) SELECT ff.Month, Origin, TimeOfDay, COUNT(*) AS TotalFlights, ROUND(AVG(TaxiOut), 2) AS AvgTaxiOut, ROUND(AVG(DepDelay), 2) AS AvgDEPDelay, ROUND(AVG(ArrDelay), 2) AS AvgARRDelay, ROUND(CORR(TaxiOut, DepDelay), 2) AS TaxiOut_DepDelay_Correlation, ROUND(CORR(TaxiOut, ArrDelay), 2) AS TaxiOut_ArrDelay_Correlation, SUM(CASE WHEN DepDel15 = 1 THEN 1 ELSE 0 END) AS DelayedFlights, ROUND( (SUM(CASE WHEN DepDel15 = 1 THEN 1 ELSE 0 END) * 100.0 / COUNT(*)), 2 ) AS PercentDelayed FROM FilteredFlights ff GROUP BY ff.Month, Origin, TimeOfDay ORDER BY ff.Month DESC, Origin, TimeOfDay;",
-      "runquantity": 795,
-      "executiontime": 20
-    },
-    {
-      "queryid": "8abd47c0-31cb-4ba0-891f-9bac53bbc909",
-      "query": "WITH AirportDiscrepancy AS ( SELECT Origin AS Airport, OriginCityName AS AirportCity, OriginState AS AirportState, 'Origin' AS AirportRole, COUNT(*) AS TotalFlights, AVG(ActualElapsedTime - CRSElapsedTime) AS AvgDiscrepancy FROM flights.public.flights GROUP BY Origin, OriginCityName, OriginState ), RankedAirports AS ( SELECT *, RANK() OVER (PARTITION BY AirportRole ORDER BY AvgDiscrepancy DESC) AS DiscrepancyRank FROM AirportDiscrepancy ) SELECT Airport, AirportCity, AirportState, TotalFlights, ROUND(AvgDiscrepancy, 2) AS AvgDiscrepancy, ROUND(SUM(CASE WHEN DepDel15 = 1 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) AS PercentDelayedDepartures, ROUND(SUM(CASE WHEN Diverted = 1 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) AS PercentDiverted, ROUND(SUM(CASE WHEN Cancelled = 1 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) AS PercentCancelled, ROUND(AVG(TaxiOut), 2) AS AvgTaxiTimeMinutes FROM flights.public.flights f JOIN RankedAirports ra ON f.Origin = ra.Airport WHERE ra.DiscrepancyRank <= 20 GROUP BY Airport, AirportCity, AirportState, TotalFlights, AvgDiscrepancy, PercentDelayedDepartures, PercentDiverted, PercentCancelled, DiscrepancyRank ORDER BY DiscrepancyRank;",
-      "runquantity": 490,
-      "executiontime": 25
-    }
-]
+    # Представим, что вы считали ваш JSON-файл в эту переменную `data_from_snippet`
+    data_from_snippet = [
+        {
+          "queryid": "10ba3c04-0f91-4ef3-a717-c1e0d33b31bc",
+          "query": "WITH MonthlyFlightCounts AS ( SELECT Origin, month(FlightDate) AS Month, COUNT(*) AS TotalFlights FROM flights.public.flights GROUP BY Origin, month(FlightDate) ORDER BY Month DESC, TotalFlights DESC ), TopAirportsByMonth AS ( SELECT Month, Origin, TotalFlights, RANK() OVER (PARTITION BY Month ORDER BY TotalFlights DESC) AS AirportRank FROM MonthlyFlightCounts ), FilteredFlights AS ( SELECT f.*, CASE WHEN f.DepTimeBlk IN ('0600-0659', '0700-0759', '0800-0859', '1600-1659', '1700-1759', '1800-1859') THEN 'Peak' ELSE 'Off-Peak' END AS TimeOfDay FROM flights.public.flights f JOIN TopAirportsByMonth t ON f.Origin = t.Origin AND month(f.FlightDate) = t.Month WHERE f.Cancelled = false AND f.Diverted = false AND t.AirportRank <= 10 ) SELECT ff.Month, Origin, TimeOfDay, COUNT(*) AS TotalFlights, ROUND(AVG(TaxiOut), 2) AS AvgTaxiOut, ROUND(AVG(DepDelay), 2) AS AvgDEPDelay, ROUND(AVG(ArrDelay), 2) AS AvgARRDelay, ROUND(CORR(TaxiOut, DepDelay), 2) AS TaxiOut_DepDelay_Correlation, ROUND(CORR(TaxiOut, ArrDelay), 2) AS TaxiOut_ArrDelay_Correlation, SUM(CASE WHEN DepDel15 = 1 THEN 1 ELSE 0 END) AS DelayedFlights, ROUND( (SUM(CASE WHEN DepDel15 = 1 THEN 1 ELSE 0 END) * 100.0 / COUNT(*)), 2 ) AS PercentDelayed FROM FilteredFlights ff GROUP BY ff.Month, Origin, TimeOfDay ORDER BY ff.Month DESC, Origin, TimeOfDay;",
+          "runquantity": 795,
+          "executiontime": 20
+        },
+        {
+          "queryid": "8abd47c0-31cb-4ba0-891f-9bac53bbc909",
+          "query": "WITH AirportDiscrepancy AS ( SELECT Origin AS Airport, OriginCityName AS AirportCity, OriginState AS AirportState, 'Origin' AS AirportRole, COUNT(*) AS TotalFlights, AVG(ActualElapsedTime - CRSElapsedTime) AS AvgDiscrepancy FROM flights.public.flights GROUP BY Origin, OriginCityName, OriginState ), RankedAirports AS ( SELECT *, RANK() OVER (PARTITION BY AirportRole ORDER BY AvgDiscrepancy DESC) AS DiscrepancyRank FROM AirportDiscrepancy ) SELECT Airport, AirportCity, AirportState, TotalFlights, ROUND(AvgDiscrepancy, 2) AS AvgDiscrepancy, ROUND(SUM(CASE WHEN DepDel15 = 1 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) AS PercentDelayedDepartures, ROUND(SUM(CASE WHEN Diverted = 1 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) AS PercentDiverted, ROUND(SUM(CASE WHEN Cancelled = 1 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) AS PercentCancelled, ROUND(AVG(TaxiOut), 2) AS AvgTaxiTimeMinutes FROM flights.public.flights f JOIN RankedAirports ra ON f.Origin = ra.Airport WHERE ra.DiscrepancyRank <= 20 GROUP BY Airport, AirportCity, AirportState, TotalFlights, AvgDiscrepancy, PercentDelayedDepartures, PercentDiverted, PercentCancelled, DiscrepancyRank ORDER BY DiscrepancyRank;",
+          "runquantity": 490,
+          "executiontime": 25
+        }
+    ]
 
-print(data['queries'][0])
-# Запускаем анализ
-marked_up_data = analyze_and_markup_sql(data_from_snippet)
-marked_up_data = analyze_and_markup_sql([data['queries'][0]])
+    print(data['queries'][0])
+    # Запускаем анализ
+    marked_up_data = analyze_and_markup_sql(data_from_snippet)
+    marked_up_data = analyze_and_markup_sql([data['queries'][0]])
 
-# Выводим результат в красивом формате JSON
+    # Выводим результат в красивом формате JSON
 
-print(json.dumps(marked_up_data, indent=2, ensure_ascii=False))
+    print(json.dumps(marked_up_data, indent=2, ensure_ascii=False))'''
+    #single_query_res = markup_single_query(data_from_snippet[0]['query'])
+
+    print(data)
+    print(single_query_res['security_score'])
+    print(single_query_res['optimization_score'])
+    print(single_query_res['performance_score'])
+    print(single_query_res['correctness_score'])
