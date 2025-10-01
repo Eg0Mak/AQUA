@@ -128,22 +128,22 @@ def calculate_scores(query):
     Вычисляет все scores и возвращает в нужном формате
     """
     # Запускаем все тесты
-    security_test = test_sql_injection(query)
-    optimization_test = test_performance_optimization(query)
-    performance_test = test_table_normalization(query)
-    correctness_test = test_correctness(query)
+    security_test = security_score(query)
+    optimization_test = optimization_score(query)
+    performance_test = performance_score(query)
+    correctness_test = correctness_score(query)
 
     # Конвертируем в символьные scores
-    security_score = "+" if security_test.passed else "-"
-    optimization_score = "+" if optimization_test.passed else "-"
-    performance_score = "+" if performance_test.passed else "-"
-    correctness_score = "+" if correctness_test.passed else "-"
+    security_score_test = "+" if security_test.passed else "-"
+    optimization_score_test = "+" if optimization_test.passed else "-"
+    performance_score_test = "+" if performance_test.passed else "-"
+    correctness_score_test = "+" if correctness_test.passed else "-"
 
     return {
-        "security_score": security_score,
-        "optimization_score": optimization_score,
-        "performance_score": performance_score,
-        "correctness_score": correctness_score
+        "security_score": security_score_test,
+        "optimization_score": optimization_score_test,
+        "performance_score": performance_score_test,
+        "correctness_score": correctness_score_test
     }
 
 
@@ -166,7 +166,7 @@ def run_complete_test(sql_query, query_id):
 
 
 if __name__ == "__main__":
-    with open('questsH.json', 'r') as f:
+    with open('data/questsH.json', 'r') as f:
         data = json.load(f)
     sql_queries = data['queries']
 
