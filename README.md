@@ -38,18 +38,20 @@
 #### **Backend & AI-компоненты:**
 
 FastAPI + Uvicorn - высокопроизводительный REST API и ASGI-сервер для развертывания
-["Подробнее про API"](https://github.com/Eg0Mak/AQUA/blob/main/API/README.md)
+[Подробнее про API](https://github.com/Eg0Mak/AQUA/blob/main/API/README.md)
 
 SQLCoder 2 + SFT/LoRA - базовая LLM с эффективным дообучением через адаптеры
 RAG-система + Optuna - база знаний по оптимизации запросов с автоматической настройкой гиперпараметров
-["Подробнее про ML"](https://github.com/Eg0Mak/AQUA/blob/main/Machine%20Learning/README.md)
+
+[Подробнее про ML](https://github.com/Eg0Mak/AQUA/blob/main/Machine%20Learning/README.md)
 
 #### **Бенчмарк-система**:
 
 Кастомный модуль оценки - проверка валидности, безопасности и оптимизации SQL-запросов
 Многокритериальная оценка
 Интегральные метрики - взвешенная оценка качества запросов
-["Подробнее про бенчмарк"](https://github.com/Eg0Mak/AQUA/blob/main/Benchmark/README.md)
+
+[Подробнее про бенчмарк](https://github.com/Eg0Mak/AQUA/blob/main/Benchmark/README.md)
 
 ### **Рабочий процесс:**
 
