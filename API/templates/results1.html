@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Результаты задачи {{ task_id }}</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .chart-container {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .status-running {
+            color: orange;
+            font-weight: bold;
+        }
+        .status-done {
+            color: green;
+            font-weight: bold;
+        }
+        .status-failed {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Результаты задачи: {{ task_id }}</h1>
+
+        <div class="status">
+            Статус: <span class="status-{{ status.lower() }}">{{ status }}</span>
+        </div>
+
+        <div class="created-at">
+            Создана: {{ task_data.created_at.strftime('%Y-%m-%d %H:%M:%S') if task_data.created_at else 'N/A' }}
+        </div>
+
+        {% if task_data.completed_at %}
+        <div class="completed-at">
+            Завершена: {{ task_data.completed_at.strftime('%Y-%m-%d %H:%M:%S') }}
+        </div>
+        {% endif %}
+
+        <!-- Исходный график (всегда показываем) -->
+        <div class="chart-container">
+            <h2>Исходные данные</h2>
+            <canvas id="originalChart" width="400" height="200"></canvas>
+        </div>
+
+        <!-- Оптимизированный график (показываем только если есть результаты) -->
+        {% if has_results %}
+        <div class="chart-container">
+            <h2>Оптимизированные данные</h2>
+            <canvas id="optimizedChart" width="400" height="200"></canvas>
+        </div>
+
+        <div class="results">
+            <h2>Результаты оптимизации</h2>
+            <pre>{{ results }}</pre>
+        </div>
+        {% elif is_running %}
+        <div class="chart-container">
+            <h2>Оптимизированные данные</h2>
+            <p>Оптимизация выполняется... Пожалуйста, подождите.</p>
+            <div class="progress">
+                <div class="progress-bar" style="width: {{ task_data.progress }}%">
+                    {{ task_data.progress }}%
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="chart-container">
+            <h2>Оптимизированные данные</h2>
+            <p>Результаты оптимизации еще не готовы.</p>
+        </div>
+        {% endif %}
+
+        {% if task_data.error %}
+        <div class="error" style="color: red;">
+            <h2>Ошибка:</h2>
+            <pre>{{ task_data.error }}</pre>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Функция для создания примеров графиков
+        function createCharts() {
+            // Исходный график
+            const originalCtx = document.getElementById('originalChart').getContext('2d');
+            const originalChart = new Chart(originalCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн'],
+                    datasets: [{
+                        label: 'Исходные данные',
+                        data: [65, 59, 80, 81, 56, 55],
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Исходные показатели'
+                        }
+                    }
+                }
+            });
+
+            // Оптимизированный график (только если есть результаты)
+            {% if has_results %}
+            const optimizedCtx = document.getElementById('optimizedChart').getContext('2d');
+            const optimizedChart = new Chart(optimizedCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн'],
+                    datasets: [{
+                        label: 'Оптимизированные данные',
+                        data: [70, 65, 85, 88, 62, 60],
+                        borderColor: 'rgb(255, 99, 132)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Оптимизированные показатели'
+                        }
+                    }
+                }
+            });
+            {% endif %}
+        }
+
+        // Автообновление страницы если задача выполняется
+        {% if is_running %}
+        setTimeout(function() {
+            location.reload();
+        }, 5000); // Обновляем каждые 5 секунд
+        {% endif %}
+
+        // Инициализация графиков при загрузке страницы
+        document.addEventListener('DOMContentLoaded', createCharts);
+    </script>
+</body>
+</html>
