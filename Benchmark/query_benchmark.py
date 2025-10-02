@@ -134,7 +134,7 @@ def evaluate_query(query: str, alpha=0.2, beta=0.4, gamma=0.2) -> dict:
         "optimization": optimization,
         "validity_score": v_score,
         "optimization_score": o_score,
-        "security_score": s_score
+        "security_score": s_score,
         "final_score": final_score
     }
 
