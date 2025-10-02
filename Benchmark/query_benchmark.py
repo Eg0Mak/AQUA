@@ -116,7 +116,7 @@ def check_optimization(query: str) -> dict:
 
 
 
-def evaluate_query(query: str, alpha=0.1, beta=0.8, gamma=0.1) -> dict:
+def evaluate_query(query: str, alpha=0.2, beta=0.4, gamma=0.2) -> dict:
     validity = check_validity(query)
     optimization = check_optimization(query)
     security = check_security(query)
@@ -126,6 +126,7 @@ def evaluate_query(query: str, alpha=0.1, beta=0.8, gamma=0.1) -> dict:
     s_score = sum(security.values()) / len(security) if security else 1.0
 
     final_score = alpha * v_score + beta * o_score + gamma * s_score
+
     #final_score = alpha * v_score + (1 - alpha) * o_score
 
     return {
@@ -134,7 +135,7 @@ def evaluate_query(query: str, alpha=0.1, beta=0.8, gamma=0.1) -> dict:
         "validity_score": v_score,
         "optimization_score": o_score,
         "security_score": s_score
-        #"final_score": final_score
+        "final_score": final_score
     }
 
 # =====================
