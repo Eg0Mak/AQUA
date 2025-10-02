@@ -38,6 +38,7 @@
 #### **Backend & AI-компоненты:**
 
 FastAPI + Uvicorn - высокопроизводительный REST API и ASGI-сервер для развертывания
+
 [Подробнее про API](https://github.com/Eg0Mak/AQUA/blob/main/API/README.md)
 
 SQLCoder 2 + SFT/LoRA - базовая LLM с эффективным дообучением через адаптеры
