@@ -20,7 +20,7 @@
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1800px;
             margin: 0 auto;
             background: white;
             border-radius: 15px;
@@ -94,18 +94,18 @@
 
         .charts-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 25px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
             margin-bottom: 25px;
         }
 
         .chart-container {
             background: white;
-            padding: 20px;
+            padding: 15px;
             border-radius: 10px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.08);
             border: 1px solid #e9ecef;
-            height: 300px;
+            height: 280px;
             position: relative;
         }
 
@@ -113,8 +113,8 @@
             text-align: center;
             font-weight: bold;
             color: #2c3e50;
-            margin-bottom: 15px;
-            font-size: 1.1em;
+            margin-bottom: 10px;
+            font-size: 1em;
         }
 
         .status-badge {
@@ -138,6 +138,12 @@
         .status-failed {
             background: #f8d7da;
             color: #721c24;
+        }
+
+        @media (max-width: 1200px) {
+            .charts-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
         @media (max-width: 768px) {
@@ -202,7 +208,7 @@
 
             <h3 style="color: #2c3e50; margin-bottom: 20px; text-align: center;">📈 Графики анализа</h3>
 
-            <!-- Первый ряд графиков -->
+            <!-- Первый ряд из 4 графиков -->
             <div class="charts-grid">
                 <div class="chart-container">
                     <div class="chart-title">График производительности</div>
@@ -212,10 +218,6 @@
                     <div class="chart-title">Распределение запросов</div>
                     <canvas id="distributionChart"></canvas>
                 </div>
-            </div>
-
-            <!-- Второй ряд графиков -->
-            <div class="charts-grid">
                 <div class="chart-container">
                     <div class="chart-title">Время выполнения</div>
                     <canvas id="timingChart"></canvas>
@@ -229,23 +231,31 @@
     </div>
 
     <script>
-        // Данные для графиков (заглушки - в реальном приложении данные должны приходить с сервера)
+        // Данные для графиков из переменных
         const chartData = {
             performance: {
-                labels: ['Запрос 1', 'Запрос 2', 'Запрос 3', 'Запрос 4', 'Запрос 5'],
-                data: [65, 59, 80, 81, 56]
+                type: '{{ charts.performance.type }}',
+                labels: {{ charts.performance.labels | tojson }},
+                datasets: {{ charts.performance.datasets | tojson }},
+                options: {{ charts.performance.options | tojson }}
             },
             distribution: {
-                labels: ['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'OTHER'],
-                data: [45, 25, 15, 10, 5]
+                type: '{{ charts.distribution.type }}',
+                labels: {{ charts.distribution.labels | tojson }},
+                datasets: {{ charts.distribution.datasets | tojson }},
+                options: {{ charts.distribution.options | tojson }}
             },
             timing: {
-                labels: ['До оптимизации', 'После оптимизации'],
-                data: [120, 75]
+                type: '{{ charts.timing.type }}',
+                labels: {{ charts.timing.labels | tojson }},
+                datasets: {{ charts.timing.datasets | tojson }},
+                options: {{ charts.timing.options | tojson }}
             },
             optimization: {
-                labels: ['Кэширование', 'Индексы', 'Оптимизация JOIN', 'Прочие'],
-                data: [40, 30, 20, 10]
+                type: '{{ charts.optimization.type }}',
+                labels: {{ charts.optimization.labels | tojson }},
+                datasets: {{ charts.optimization.datasets | tojson }},
+                options: {{ charts.optimization.options | tojson }}
             }
         };
 
@@ -253,94 +263,42 @@
         function initializeCharts() {
             // График производительности
             new Chart(document.getElementById('performanceChart'), {
-                type: 'bar',
+                type: chartData.performance.type,
                 data: {
                     labels: chartData.performance.labels,
-                    datasets: [{
-                        label: 'Время выполнения (мс)',
-                        data: chartData.performance.data,
-                        backgroundColor: 'rgba(54, 162, 235, 0.8)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 1
-                    }]
+                    datasets: chartData.performance.datasets
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
+                options: chartData.performance.options
             });
 
             // График распределения
             new Chart(document.getElementById('distributionChart'), {
-                type: 'pie',
+                type: chartData.distribution.type,
                 data: {
                     labels: chartData.distribution.labels,
-                    datasets: [{
-                        data: chartData.distribution.data,
-                        backgroundColor: [
-                            'rgba(255, 99, 132, 0.8)',
-                            'rgba(54, 162, 235, 0.8)',
-                            'rgba(255, 206, 86, 0.8)',
-                            'rgba(75, 192, 192, 0.8)',
-                            'rgba(153, 102, 255, 0.8)'
-                        ]
-                    }]
+                    datasets: chartData.distribution.datasets
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false
-                }
+                options: chartData.distribution.options
             });
 
             // График времени выполнения
             new Chart(document.getElementById('timingChart'), {
-                type: 'line',
+                type: chartData.timing.type,
                 data: {
                     labels: chartData.timing.labels,
-                    datasets: [{
-                        label: 'Время (мс)',
-                        data: chartData.timing.data,
-                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        borderWidth: 2,
-                        tension: 0.1
-                    }]
+                    datasets: chartData.timing.datasets
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
+                options: chartData.timing.options
             });
 
             // График оптимизации
             new Chart(document.getElementById('optimizationChart'), {
-                type: 'doughnut',
+                type: chartData.optimization.type,
                 data: {
                     labels: chartData.optimization.labels,
-                    datasets: [{
-                        data: chartData.optimization.data,
-                        backgroundColor: [
-                            'rgba(255, 99, 132, 0.8)',
-                            'rgba(54, 162, 235, 0.8)',
-                            'rgba(255, 206, 86, 0.8)',
-                            'rgba(75, 192, 192, 0.8)'
-                        ]
-                    }]
+                    datasets: chartData.optimization.datasets
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false
-                }
+                options: chartData.optimization.options
             });
         }
 

@@ -1,0 +1,127 @@
+Optimized SQL and explanation:
+================================================================================
+
+I am a senior SQL developer with many years of experience, deeply understanding the philosophy of writing SQL code, its subtle points, and potential vulnerabilities. Please optimize the following SQL query as efficiently and safely as possible. Full context of the database and environment is provided.
+
+Tasks:
+1. Analyze the query in terms of performance: estimate number of operations, iterations, and volume of data read.
+2. Identify bottlenecks and potential vulnerabilities, including SQL injection risks, suboptimal joins, unnecessary subqueries, and aggregations.
+3. Apply best practices for query optimization where possible, such as: proper indexing, reordering of filter conditions (WHERE, ON), optimizing join order, minimizing data volume in intermediate steps, using window functions or CTEs.
+4. Provide a revised query that is fully detailed, safe, and includes an explanation of each change. Preserve the semantic meaning of the original query. If a JOIN can be safely removed without changing the semantics, do so.
+5. Take into account the specific database system, version, and configuration. For repeated computations, suggest caching or materialization strategies.
+6. Emphasize security: eliminate any risks of data leakage or unintended operations.
+7. Additionally, create a concise operations map with estimated time and computational complexity. Where possible, provide alternative optimization options and tools for monitoring and diagnostics.
+
+For analysis, I provide the original SQL query, the execution plan, and database structure (if necessary).
+
+Context:
+
+
+
+
+    Example 1:
+    Original SQL:
+    SELECT * FROM orders WHERE user_id IN (SELECT id FROM users WHERE status='active');
+    Optimized SQL:
+    SELECT o.*
+    FROM orders o
+    JOIN users u ON o.user_id = u.id
+    WHERE u.status='active';
+
+    Example 2:
+    Original SQL:
+    SELECT u.id, (SELECT COUNT(*) FROM orders o WHERE o.user_id=u.id) AS order_count FROM users u;
+    Optimized SQL:
+    SELECT u.id, COUNT(o.id) AS order_count
+    FROM users u
+    LEFT JOIN orders o ON u.id = o.user_id
+    GROUP BY u.id;
+
+    Example 3:
+    Original SQL:
+    SELECT o.id, o.total, u.name
+    FROM orders o
+    JOIN users u ON o.user_id = u.id
+    WHERE u.status='active' AND o.total > 100;
+    Optimized SQL:
+    SELECT o.id, o.total, u.name
+    FROM orders o
+    JOIN users u ON o.user_id = u.id
+    WHERE u.status='active' AND o.total > 100;
+    -- Этот запрос уже оптимален, изменений не требуется
+
+    Example 4:
+    Original SQL:
+    WITH recent_orders AS (
+        SELECT * FROM orders WHERE created_at > NOW() - INTERVAL '30 days'
+    )
+    SELECT u.id, u.name, COUNT(r.id)
+    FROM users u
+    JOIN recent_orders r ON u.id = r.user_id
+    GROUP BY u.id, u.name;
+    Optimized SQL:
+    SELECT u.id, u.name, COUNT(o.id)
+    FROM users u
+    JOIN orders o ON u.id = o.user_id
+    WHERE o.created_at > NOW() - INTERVAL '30 days'
+    GROUP BY u.id, u.name;
+
+    Example 5:
+    Original SQL:
+    SELECT u.id, u.name,
+          (SELECT MAX(p.created_at) FROM payments p WHERE p.user_id=u.id) AS last_payment
+    FROM users u;
+    Optimized SQL:
+    SELECT u.id, u.name, MAX(p.created_at) AS last_payment
+    FROM users u
+    LEFT JOIN payments p ON u.id = p.user_id
+    GROUP BY u.id, u.name;
+
+    Example 6:
+    Original SQL:
+    WITH recent_orders AS (
+        SELECT * FROM orders WHERE created_at > NOW() - INTERVAL '30 days'
+    ),
+    completed_payments AS (
+        SELECT * FROM payments WHERE status = 'completed'
+    )
+    SELECT u.id, u.name, r.id AS order_id, r.total, p.id AS payment_id, p.created_at AS payment_date
+    FROM users u
+    JOIN recent_orders r ON u.id = r.user_id
+    LEFT JOIN completed_payments p ON r.id = p.order_id
+    WHERE u.status = 'active'
+    ORDER BY r.total DESC;
+    Optimized SQL:
+    SELECT u.id, u.name, o.id AS order_id, o.total, p.id AS payment_id, p.created_at AS payment_date
+    FROM users u
+    JOIN orders o
+        ON u.id = o.user_id
+        AND o.created_at > NOW() - INTERVAL '30 days'
+    LEFT JOIN payments p
+        ON o.id = p.order_id
+        AND p.status = 'completed'
+    WHERE u.status = 'active'
+    ORDER BY o.total DESC;
+
+    Example 7:
+    Original SQL:
+    SELECT u.id, u.name, o.id AS order_id, o.total,
+          SUM(p.amount) OVER(PARTITION BY u.id ORDER BY p.created_at) AS cumulative_payments
+    FROM users u
+    JOIN orders o ON u.id = o.user_id
+    LEFT JOIN payments p ON o.id = p.order_id
+    WHERE u.status='active';
+    Optimized SQL:
+    SELECT u.id, u.name, o.id AS order_id, o.total,
+          SUM(p.amount) OVER(PARTITION BY u.id ORDER BY p.created_at) AS cumulative_payments
+    FROM users u
+    JOIN orders o ON u.id = o.user_id
+    LEFT JOIN payments p ON o.id = p.order_id AND p.status='completed'
+    WHERE u.status='active';
+    -- Добавлен фильтр p.status='completed' для оптимизации
+
+
+Now optimize this SQL query:
+
+Original SQL:
+SELECT student_name FROM students WHERE student_id IN ( SELECT student_id FROM ( SELECT student_id, gender FROM ( SELECT student_id, gender FROM ( SELECT student_id, gender FROM students ) AS inner_dt2 ) AS inner_dt1 ) AS outer_dt );
