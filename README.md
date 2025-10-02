@@ -67,4 +67,4 @@ RAG-система + Optuna - база знаний по оптимизации 
 - Бенчмарк SQL-запроса после обработки
 
 ### [Ссылка на презентацию проекта](https://docs.google.com/presentation/d/1c1HmQIaQAlnts8b9QqD1q765-Tp1A0OxZjJGpqW5qak/edit?usp=sharing)
-### [Ссылка на презентацию проекта(На Git)]()
+### [Ссылка на презентацию проекта(На Git)](https://github.com/Eg0Mak/AQUA/blob/main/Presentation/02_ЛЦТ_2025.pdf)
