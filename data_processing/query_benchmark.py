@@ -23,6 +23,35 @@ def strip_comments(sql: str) -> str:
     s = re.sub(r"/\*.*?\*/", "", s, flags=re.DOTALL)
     return s
 
+
+
+def check_security(query: str) -> dict:
+    q = strip_comments(query)
+    up = safe_upper(q)
+    results = {}
+
+    # 1. SQL Injection patterns
+    results["no_union_select"] = "UNION SELECT" not in up
+    results["no_always_true_condition"] = not bool(re.search(r"(\bor\b\s+1\s*=\s*1)", up))
+    results["no_always_false_condition"] = not bool(re.search(r"(\band\b\s+1\s*=\s*0)", up))
+
+    # 2. Ограничения по DDL/DML (опасные операции)
+    results["no_drop"] = "DROP" not in up
+    results["no_truncate"] = "TRUNCATE" not in up
+    results["no_alter"] = "ALTER" not in up
+    results["no_insert"] = "INSERT" not in up
+    results["no_update"] = "UPDATE" not in up
+    results["no_delete"] = "DELETE" not in up
+
+    # 3. Проверка на лишний доступ
+    results["no_grant_revoke"] = not bool(re.search(r"\b(GRANT|REVOKE)\b", up))
+
+    # 4. Проверка на опасные функции
+    dangerous_funcs = ["EXEC", "EXECUTE", "XP_CMD", "SYSOBJECTS"]
+    results["no_dangerous_functions"] = not any(func in up for func in dangerous_funcs)
+
+    return results
+
 # =====================
 # Проверки валидности
 # =====================
@@ -85,20 +114,27 @@ def check_optimization(query: str) -> dict:
 # Итоговая оценка
 # =====================
 
-def evaluate_query(query: str, alpha: float = 0.5) -> dict:
+
+
+def evaluate_query(query: str, alpha=0.1, beta=0.8, gamma=0.1) -> dict:
     validity = check_validity(query)
     optimization = check_optimization(query)
+    security = check_security(query)
 
     v_score = sum(validity.values()) / len(validity) if validity else 1.0
     o_score = sum(optimization.values()) / len(optimization) if optimization else 1.0
-    final_score = alpha * v_score + (1 - alpha) * o_score
+    s_score = sum(security.values()) / len(security) if security else 1.0
+
+    final_score = alpha * v_score + beta * o_score + gamma * s_score
+    #final_score = alpha * v_score + (1 - alpha) * o_score
 
     return {
         "validity": validity,
         "optimization": optimization,
         "validity_score": v_score,
         "optimization_score": o_score,
-        "final_score": final_score
+        "security_score": s_score
+        #"final_score": final_score
     }
 
 # =====================
@@ -157,5 +193,5 @@ if __name__ == '__main__':
     with open(filepath, "r", encoding="utf-8") as f:
         for line in f:
             obj = json.loads(line)
-            single_query_res = evaluate_query(obj['output'])
+            single_query_res = evaluate_query(obj['input'])
             print(single_query_res)
